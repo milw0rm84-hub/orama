@@ -76,10 +76,21 @@
         .swiper-pagination-bullet { background: var(--gold) !important; opacity: 0.3; }
         .swiper-pagination-bullet-active { opacity: 1; }
 
+        /* Loader */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--dark);
+            z-index: 10002;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         /* --- ADMIN CONSOLE STYLES --- */
         #admin-console { display: none; background: var(--admin-bg); min-height: 100vh; color: #ccc; }
         .admin-sidebar { background: #000; border-right: 1px solid #333; }
-        .admin-btn { transition: all 0.2s; border-radius: 4px; border: none; outline: none; }
+        .admin-btn { transition: all 0.2s; border-radius: 4px; border: none; outline: none; text-align: left; }
         .admin-btn:hover { background: #222; color: var(--gold); }
         .admin-btn.active { background: var(--gold); color: #000; }
         .input-group input, .input-group textarea, .input-group select {
@@ -98,6 +109,11 @@
 </head>
 <body id="top" class="public-view">
 
+    <!-- Preloader -->
+    <div id="loader">
+        <h2 class="text-gold text-4xl serif tracking-[0.5em] animate-pulse">ORAMA</h2>
+    </div>
+
     <!-- PUBLIC SITE -->
     <div id="site-wrapper">
         <div class="bg-canvas"></div>
@@ -106,16 +122,16 @@
         <div id="cursor"></div>
         <div id="cursor-follower"></div>
 
-        <nav class="fixed w-full z-50 glass-nav border-b border-white/5 py-5 px-6 md:px-12 flex justify-between items-center">
+        <nav class="fixed w-full z-50 glass-nav border-b border-white/5 py-5 px-6 md:px-12 flex justify-between items-center opacity-0" id="main-nav">
             <a href="#top" class="text-2xl font-light tracking-[0.3em] text-gold serif" id="nav-logo">ORAMA</a>
             <div class="hidden lg:flex space-x-12 text-[10px] uppercase tracking-[0.3em] font-light">
-                <a href="#top">Home</a>
-                <a href="#about">About</a>
-                <a href="#menu">Cuisine</a>
-                <a href="#team">Team</a>
-                <a href="#gallery">Atmosphere</a>
-                <a href="#journal">Journal</a>
-                <a href="#booking">Reservations</a>
+                <a href="#top" class="hover:text-gold transition-colors">Home</a>
+                <a href="#about" class="hover:text-gold transition-colors">About</a>
+                <a href="#menu" class="hover:text-gold transition-colors">Cuisine</a>
+                <a href="#team" class="hover:text-gold transition-colors">Team</a>
+                <a href="#gallery" class="hover:text-gold transition-colors">Atmosphere</a>
+                <a href="#journal" class="hover:text-gold transition-colors">Journal</a>
+                <a href="#booking" class="hover:text-gold transition-colors">Reservations</a>
             </div>
             <a href="#booking" class="bg-gold/10 border border-gold/50 text-gold px-8 py-2 text-[10px] uppercase tracking-widest hover:bg-gold hover:text-white transition-all">
                 Book a Table
@@ -124,14 +140,14 @@
 
         <!-- Hero -->
         <section class="relative h-screen flex items-center justify-center overflow-hidden">
-            <div class="absolute inset-0 z-0">
-                <img src="" class="w-full h-full object-cover" id="hero-img-bg">
+            <div class="absolute inset-0 z-0 overflow-hidden" id="hero-img-container" style="clip-path: inset(100% 0% 0% 0%);">
+                <img src="" class="w-full h-full object-cover scale-125" id="hero-img-bg">
                 <div class="absolute inset-0 bg-black/50"></div>
             </div>
             <div class="relative z-10 text-center px-4">
-                <h4 class="text-gold uppercase tracking-[0.8em] text-[10px] mb-6" id="hero-sub-text"></h4>
-                <h1 class="text-7xl md:text-[10rem] font-extralight mb-6 leading-none" id="hero-title-text"></h1>
-                <p class="max-w-2xl mx-auto text-[10px] md:text-xs text-gray-300 font-light tracking-[0.4em] uppercase" id="hero-tagline-text"></p>
+                <div class="overflow-hidden mb-6"><h4 class="text-gold uppercase tracking-[0.8em] text-[10px] translate-y-full" id="hero-sub-text"></h4></div>
+                <div class="overflow-hidden mb-6"><h1 class="text-7xl md:text-[10rem] font-extralight leading-none translate-y-full" id="hero-title-text"></h1></div>
+                <div class="overflow-hidden"><p class="max-w-2xl mx-auto text-[10px] md:text-xs text-gray-300 font-light tracking-[0.4em] uppercase translate-y-full" id="hero-tagline-text"></p></div>
             </div>
         </section>
 
@@ -143,8 +159,8 @@
                     <h2 class="text-5xl md:text-7xl serif mb-10 leading-tight" id="about-title-text"></h2>
                     <p class="text-gray-400 font-light leading-relaxed mb-8 text-lg" id="about-desc-text"></p>
                 </div>
-                <div class="reveal">
-                    <img src="" id="about-img" class="w-full grayscale hover:grayscale-0 transition-all duration-1000 shadow-2xl">
+                <div class="reveal overflow-hidden">
+                    <img src="" id="about-img" class="w-full grayscale hover:grayscale-0 transition-all duration-1000 shadow-2xl scale-110">
                 </div>
             </div>
         </section>
@@ -180,7 +196,6 @@
             
             <div class="swiper atmosphereSwiper reveal">
                 <div class="swiper-wrapper" id="public-gallery-grid">
-                    <!-- Swiper Slides dynamically inserted here -->
                 </div>
                 <div class="swiper-pagination"></div>
             </div>
@@ -275,13 +290,13 @@
         <div class="w-64 admin-sidebar h-screen sticky top-0 flex flex-col p-6">
             <h3 class="serif text-gold text-2xl mb-8">ORAMA CMS</h3>
             <nav class="flex-grow space-y-2">
-                <button class="admin-btn active w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('dashboard')">Dashboard</button>
-                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('res-mgr')">Reservations</button>
-                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('team-mgr')">Culinary Team</button>
-                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('blog-mgr')">Journal / Blog</button>
-                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('menu-mgr')">Menu Items</button>
-                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('gallery-mgr')">Gallery</button>
-                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('site-content')">Page Content</button>
+                <button class="admin-btn active w-full p-3 text-xs tracking-widest uppercase" onclick="showTab('dashboard')">Dashboard</button>
+                <button class="admin-btn w-full p-3 text-xs tracking-widest uppercase" onclick="showTab('res-mgr')">Reservations</button>
+                <button class="admin-btn w-full p-3 text-xs tracking-widest uppercase" onclick="showTab('team-mgr')">Culinary Team</button>
+                <button class="admin-btn w-full p-3 text-xs tracking-widest uppercase" onclick="showTab('blog-mgr')">Journal / Blog</button>
+                <button class="admin-btn w-full p-3 text-xs tracking-widest uppercase" onclick="showTab('menu-mgr')">Menu Items</button>
+                <button class="admin-btn w-full p-3 text-xs tracking-widest uppercase" onclick="showTab('gallery-mgr')">Gallery</button>
+                <button class="admin-btn w-full p-3 text-xs tracking-widest uppercase" onclick="showTab('site-content')">Page Content</button>
             </nav>
             <button onclick="logout()" class="mt-auto text-[10px] text-red-500 uppercase tracking-widest">Exit</button>
         </div>
@@ -310,7 +325,6 @@
                 </div>
             </div>
 
-            <!-- Reservation Manager -->
             <div id="res-mgr" class="tab-content space-y-8">
                 <h2 class="serif text-white text-4xl">Reservations</h2>
                 <div class="bg-black border border-white/10 overflow-hidden">
@@ -329,50 +343,44 @@
                 </div>
             </div>
 
-            <!-- Team Manager -->
             <div id="team-mgr" class="tab-content space-y-8">
                 <div class="flex justify-between items-center">
                     <h2 class="serif text-white text-4xl">The Team</h2>
                     <button onclick="openTeamModal()" class="bg-gold text-dark px-6 py-2 text-[10px] font-bold uppercase">New Member</button>
                 </div>
-                <div id="admin-team-list" class="grid grid-cols-2 gap-6"></div>
+                <div id="admin-team-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </div>
 
-            <!-- Blog Manager -->
             <div id="blog-mgr" class="tab-content space-y-8">
                 <div class="flex justify-between items-center">
                     <h2 class="serif text-white text-4xl">Journal Posts</h2>
                     <button onclick="openBlogModal()" class="bg-gold text-dark px-6 py-2 text-[10px] font-bold uppercase">New Post</button>
                 </div>
-                <div id="admin-blog-list" class="grid grid-cols-2 gap-6"></div>
+                <div id="admin-blog-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </div>
 
-            <!-- Menu Manager -->
             <div id="menu-mgr" class="tab-content space-y-8">
                 <div class="flex justify-between items-center">
                     <h2 class="serif text-white text-4xl">The Menu</h2>
                     <button onclick="openMenuModal()" class="bg-gold text-dark px-6 py-2 text-[10px] font-bold uppercase">Add Item</button>
                 </div>
-                <div id="admin-menu-list" class="grid grid-cols-2 gap-4"></div>
+                <div id="admin-menu-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
-            <!-- Gallery Manager -->
             <div id="gallery-mgr" class="tab-content space-y-8">
                 <div class="flex justify-between items-center">
                     <h2 class="serif text-white text-4xl">Gallery Media</h2>
                     <button onclick="openGalleryModal()" class="bg-gold text-dark px-6 py-2 text-[10px] font-bold uppercase">Add Photo</button>
                 </div>
-                <div id="admin-gallery-list" class="grid grid-cols-4 gap-4"></div>
+                <div id="admin-gallery-list" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
             </div>
 
-            <!-- Site Content Editor -->
             <div id="site-content" class="tab-content space-y-12">
                 <div class="flex justify-between items-center">
                     <h2 class="serif text-white text-4xl">Global Site Content</h2>
                     <button onclick="saveAllPageContent()" class="bg-gold text-dark px-10 py-3 text-[10px] font-bold uppercase hover:bg-white transition-all">Save All Changes</button>
                 </div>
-
-                <!-- Hero Section -->
+                <!-- Site content forms -->
                 <div class="bg-white/5 p-8 border border-white/5 space-y-6">
                     <h4 class="text-gold uppercase tracking-widest text-[10px] font-bold">1. Hero Section</h4>
                     <div class="grid md:grid-cols-2 gap-6">
@@ -382,8 +390,6 @@
                     <div class="input-group"><label>Hero Tagline</label><input type="text" id="p-hero-tagline"></div>
                     <div class="input-group"><label>Hero Image URL</label><input type="text" id="p-hero-img"></div>
                 </div>
-
-                <!-- About Section -->
                 <div class="bg-white/5 p-8 border border-white/5 space-y-6">
                     <h4 class="text-gold uppercase tracking-widest text-[10px] font-bold">2. Heritage Section</h4>
                     <div class="grid md:grid-cols-2 gap-6">
@@ -393,26 +399,12 @@
                     <div class="input-group"><label>Description Text</label><textarea id="p-about-desc" rows="4"></textarea></div>
                     <div class="input-group"><label>Section Image URL</label><input type="text" id="p-about-img"></div>
                 </div>
-
-                <!-- Contact & Footer Section -->
-                <div class="bg-white/5 p-8 border border-white/5 space-y-6">
-                    <h4 class="text-gold uppercase tracking-widest text-[10px] font-bold">3. Contact & Hours</h4>
-                    <div class="grid md:grid-cols-3 gap-6">
-                        <div class="input-group"><label>Address</label><input type="text" id="p-contact-addr"></div>
-                        <div class="input-group"><label>Phone</label><input type="text" id="p-contact-phone"></div>
-                        <div class="input-group"><label>Email</label><input type="text" id="p-contact-email"></div>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="input-group"><label>Mon-Fri Hours</label><input type="text" id="p-hours-week"></div>
-                        <div class="input-group"><label>Sat-Sun Hours</label><input type="text" id="p-hours-weekend"></div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
     <!-- MODALS -->
-    <!-- Team Member Modal -->
+    <!-- Team Modal -->
     <div id="team-modal" class="fixed inset-0 z-[200] modal-overlay hidden flex items-center justify-center p-6">
         <div class="bg-black border border-gold/30 w-full max-w-2xl p-10 space-y-6">
             <h3 class="serif text-gold text-3xl">Team Member Profile</h3>
@@ -425,7 +417,7 @@
             <div class="input-group"><label>Profile Image URL</label><input type="text" id="t-img"></div>
             <div class="flex space-x-4">
                 <button onclick="saveTeamMember()" class="flex-grow bg-gold text-dark py-4 text-[10px] font-bold uppercase">Save Profile</button>
-                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500">Cancel</button>
+                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500 uppercase text-[10px]">Cancel</button>
             </div>
         </div>
     </div>
@@ -438,10 +430,10 @@
             <div class="input-group"><label>Title</label><input type="text" id="b-title"></div>
             <div class="input-group"><label>Excerpt</label><input type="text" id="b-excerpt"></div>
             <div class="input-group"><label>Content</label><textarea id="b-content" rows="6"></textarea></div>
-            <div class="input-group"><label>Cover Image URL</label><input type="text" id="b-img"></div>
+            <div class="input-group"><label>Thumbnail URL</label><input type="text" id="b-img"></div>
             <div class="flex space-x-4">
-                <button onclick="saveBlogPost()" class="flex-grow bg-gold text-dark py-4 text-[10px] font-bold uppercase">Publish</button>
-                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500">Cancel</button>
+                <button onclick="saveBlogPost()" class="flex-grow bg-gold text-dark py-4 text-[10px] font-bold uppercase">Save Post</button>
+                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500 uppercase text-[10px]">Cancel</button>
             </div>
         </div>
     </div>
@@ -451,13 +443,15 @@
         <div class="bg-black border border-gold/30 w-full max-w-2xl p-10 space-y-6">
             <h3 class="serif text-gold text-3xl">Menu Item</h3>
             <input type="hidden" id="m-id">
-            <div class="input-group"><label>Tag (e.g. Sea, Land)</label><input type="text" id="m-tag"></div>
-            <div class="input-group"><label>Title</label><input type="text" id="m-title"></div>
-            <div class="input-group"><label>Description</label><input type="text" id="m-desc"></div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="input-group"><label>Category</label><input type="text" id="m-tag" placeholder="Sea / Land / Earth"></div>
+                <div class="input-group"><label>Name</label><input type="text" id="m-title"></div>
+            </div>
+            <div class="input-group"><label>Ingredients / Description</label><input type="text" id="m-desc"></div>
             <div class="input-group"><label>Image URL</label><input type="text" id="m-img"></div>
             <div class="flex space-x-4">
                 <button onclick="saveMenuItem()" class="flex-grow bg-gold text-dark py-4 text-[10px] font-bold uppercase">Save Item</button>
-                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500">Cancel</button>
+                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500 uppercase text-[10px]">Cancel</button>
             </div>
         </div>
     </div>
@@ -465,12 +459,12 @@
     <!-- Gallery Modal -->
     <div id="gallery-modal" class="fixed inset-0 z-[200] modal-overlay hidden flex items-center justify-center p-6">
         <div class="bg-black border border-gold/30 w-full max-w-md p-10 space-y-6">
-            <h3 class="serif text-gold text-3xl">Gallery Asset</h3>
+            <h3 class="serif text-gold text-3xl">Gallery Media</h3>
             <div class="input-group"><label>Image URL</label><input type="text" id="g-img"></div>
-            <div class="input-group"><label>Caption (Optional)</label><input type="text" id="g-caption"></div>
+            <div class="input-group"><label>Caption</label><input type="text" id="g-caption"></div>
             <div class="flex space-x-4">
-                <button onclick="saveGalleryItem()" class="flex-grow bg-gold text-dark py-4 text-[10px] font-bold uppercase">Add to Gallery</button>
-                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500">Cancel</button>
+                <button onclick="saveGalleryItem()" class="flex-grow bg-gold text-dark py-4 text-[10px] font-bold uppercase">Save Photo</button>
+                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500 uppercase text-[10px]">Cancel</button>
             </div>
         </div>
     </div>
@@ -480,7 +474,6 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
-        // Initial Data Structure
         let siteData = {
             hero: {
                 title: "ORAMA",
@@ -519,28 +512,21 @@
             blog: [
                 { id: 1, title: "The Philosophy of Fire", excerpt: "Exploring the ancient Roman art of open-flame cooking.", content: "Fire is more than a tool...", img: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1000", date: "Jan 12, 2026" }
             ],
-            reservations: [
-                { id: 1, date: "2026-02-14", time: "20:00", name: "Marcello Russo", email: "marcello@italy.it", guests: 2, status: "confirmed" }
-            ]
+            reservations: []
         };
 
         let gallerySwiper;
 
-        // UI View Toggling
         function toggleView(viewId) {
             document.querySelectorAll('#site-wrapper, #admin-auth, #admin-console').forEach(el => el.style.display = 'none');
             const target = document.getElementById(viewId);
             target.style.display = (viewId === 'admin-console' ? 'flex' : 'block');
-            
             if(viewId === 'site-wrapper') {
                 document.body.classList.add('public-view');
                 syncPublicUI();
             } else {
                 document.body.classList.remove('public-view');
-                if(viewId === 'admin-console') {
-                    updateStats();
-                    loadPageContentFields();
-                }
+                if(viewId === 'admin-console') syncAdminUI();
             }
         }
 
@@ -555,276 +541,28 @@
             document.querySelectorAll('.tab-content, .admin-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
-            
-            if(tabId === 'res-mgr') renderAdminReservations();
-            if(tabId === 'team-mgr') renderAdminTeam();
-            if(tabId === 'blog-mgr') renderAdminBlog();
-            if(tabId === 'menu-mgr') renderAdminMenu();
-            if(tabId === 'gallery-mgr') renderAdminGallery();
-            if(tabId === 'site-content') loadPageContentFields();
+            syncAdminUI();
         }
 
-        // --- CMS LOGIC ---
-
-        // Team Management
-        function renderAdminTeam() {
-            document.getElementById('admin-team-list').innerHTML = siteData.team.map(t => `
-                <div class="bg-white/5 p-4 border border-white/10 flex items-center space-x-4 group">
-                    <img src="${t.img}" class="w-16 h-16 rounded-full object-cover">
-                    <div class="flex-grow">
-                        <h5 class="text-white text-sm font-semibold">${t.name}</h5>
-                        <p class="text-[10px] text-gold uppercase tracking-widest">${t.role}</p>
-                    </div>
-                    <div class="opacity-0 group-hover:opacity-100 transition-opacity space-x-4">
-                        <button onclick="openTeamModal(${t.id})" class="text-gold text-[10px] uppercase">Edit</button>
-                        <button onclick="deleteTeamMember(${t.id})" class="text-red-500 text-[10px] uppercase">Remove</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function openTeamModal(id = null) {
-            document.getElementById('team-modal').classList.remove('hidden');
-            if(id) {
-                const t = siteData.team.find(x => x.id === id);
-                ['id','name','role','bio','img'].forEach(k => document.getElementById(`t-${k}`).value = t[k]);
-            } else {
-                ['id','name','role','bio','img'].forEach(k => document.getElementById(`t-${k}`).value = "");
-            }
-        }
-
-        function saveTeamMember() {
-            const id = document.getElementById('t-id').value;
-            const member = {
-                id: id ? parseInt(id) : Date.now(),
-                name: document.getElementById('t-name').value,
-                role: document.getElementById('t-role').value,
-                bio: document.getElementById('t-bio').value,
-                img: document.getElementById('t-img').value
-            };
-            if(id) siteData.team[siteData.team.findIndex(x=>x.id===parseInt(id))] = member;
-            else siteData.team.push(member);
-            renderAdminTeam(); closeModals(); updateStats();
-        }
-
-        function deleteTeamMember(id) { siteData.team = siteData.team.filter(t=>t.id!==id); renderAdminTeam(); updateStats(); }
-
-        // Rest of CMS
-        function loadPageContentFields() {
-            document.getElementById('p-hero-title').value = siteData.hero.title;
-            document.getElementById('p-hero-sub').value = siteData.hero.sub;
-            document.getElementById('p-hero-tagline').value = siteData.hero.tagline;
-            document.getElementById('p-hero-img').value = siteData.hero.img;
-            document.getElementById('p-about-tag').value = siteData.about.tag;
-            document.getElementById('p-about-title').value = siteData.about.title;
-            document.getElementById('p-about-desc').value = siteData.about.desc;
-            document.getElementById('p-about-img').value = siteData.about.img;
-            document.getElementById('p-contact-addr').value = siteData.contact.address;
-            document.getElementById('p-contact-phone').value = siteData.contact.phone;
-            document.getElementById('p-contact-email').value = siteData.contact.email;
-            document.getElementById('p-hours-week').value = siteData.contact.hoursWeek;
-            document.getElementById('p-hours-weekend').value = siteData.contact.hoursWeekend;
-        }
-
-        function saveAllPageContent() {
-            siteData.hero.title = document.getElementById('p-hero-title').value;
-            siteData.hero.sub = document.getElementById('p-hero-sub').value;
-            siteData.hero.tagline = document.getElementById('p-hero-tagline').value;
-            siteData.hero.img = document.getElementById('p-hero-img').value;
-            siteData.about.tag = document.getElementById('p-about-tag').value;
-            siteData.about.title = document.getElementById('p-about-title').value;
-            siteData.about.desc = document.getElementById('p-about-desc').value;
-            siteData.about.img = document.getElementById('p-about-img').value;
-            siteData.contact.address = document.getElementById('p-contact-addr').value;
-            siteData.contact.phone = document.getElementById('p-contact-phone').value;
-            siteData.contact.email = document.getElementById('p-contact-email').value;
-            siteData.contact.hoursWeek = document.getElementById('p-hours-week').value;
-            siteData.contact.hoursWeekend = document.getElementById('p-hours-weekend').value;
-            alert('Website content updated.');
-        }
-
-        function handlePublicBooking(e) {
-            e.preventDefault();
-            const booking = {
-                id: Date.now(),
-                date: document.getElementById('res-date').value,
-                time: document.getElementById('res-time').value,
-                name: document.getElementById('res-name').value,
-                email: document.getElementById('res-email').value,
-                guests: document.getElementById('res-guests').value,
-                status: 'pending'
-            };
-            siteData.reservations.push(booking);
-            document.getElementById('booking-msg').classList.remove('hidden');
-            e.target.reset();
-        }
-
-        function renderAdminReservations() {
-            document.getElementById('admin-res-list').innerHTML = siteData.reservations.map(r => `
-                <tr>
-                    <td class="p-4 text-gray-400">${r.date} @ ${r.time}</td>
-                    <td class="p-4 font-semibold text-white">${r.name}<br><span class="opacity-40 text-[8px] font-normal uppercase">${r.email}</span></td>
-                    <td class="p-4 text-gold">${r.guests} Guests</td>
-                    <td class="p-4"><span class="status-pill status-${r.status}">${r.status}</span></td>
-                    <td class="p-4 space-x-2">
-                        ${r.status === 'pending' ? `<button onclick="updateResStatus(${r.id}, 'confirmed')" class="text-green-500 hover:underline">Confirm</button>` : ''}
-                        <button onclick="deleteRes(${r.id})" class="text-red-500 hover:underline">Cancel</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function updateResStatus(id, status) {
-            const idx = siteData.reservations.findIndex(r => r.id === id);
-            siteData.reservations[idx].status = status;
-            renderAdminReservations();
-            updateStats();
-        }
-
-        function deleteRes(id) {
-            siteData.reservations = siteData.reservations.filter(r => r.id !== id);
-            renderAdminReservations();
-            updateStats();
-        }
-
-        function renderAdminBlog() {
-            document.getElementById('admin-blog-list').innerHTML = siteData.blog.map(b => `
-                <div class="bg-white/5 p-4 border border-white/10 flex items-center space-x-4 group">
-                    <img src="${b.img}" class="w-20 h-20 object-cover">
-                    <div class="flex-grow">
-                        <h5 class="text-white text-sm font-semibold">${b.title}</h5>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">${b.date}</p>
-                    </div>
-                    <div class="opacity-0 group-hover:opacity-100 transition-opacity space-x-4">
-                        <button onclick="openBlogModal(${b.id})" class="text-gold text-[10px] uppercase">Edit</button>
-                        <button onclick="deleteBlog(${b.id})" class="text-red-500 text-[10px] uppercase">Remove</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function openBlogModal(id = null) {
-            document.getElementById('blog-modal').classList.remove('hidden');
-            if(id) {
-                const b = siteData.blog.find(x => x.id === id);
-                ['id','title','excerpt','content','img'].forEach(k => document.getElementById(`b-${k}`).value = b[k]);
-            } else {
-                ['id','title','excerpt','content','img'].forEach(k => document.getElementById(`b-${k}`).value = "");
-            }
-        }
-
-        function saveBlogPost() {
-            const id = document.getElementById('b-id').value;
-            const post = {
-                id: id ? parseInt(id) : Date.now(),
-                title: document.getElementById('b-title').value,
-                excerpt: document.getElementById('b-excerpt').value,
-                content: document.getElementById('b-content').value,
-                img: document.getElementById('b-img').value,
-                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-            };
-            if(id) siteData.blog[siteData.blog.findIndex(x=>x.id===parseInt(id))] = post;
-            else siteData.blog.push(post);
-            renderAdminBlog(); closeModals(); updateStats();
-        }
-
-        function deleteBlog(id) { siteData.blog = siteData.blog.filter(b=>b.id!==id); renderAdminBlog(); updateStats(); }
-
-        function renderAdminMenu() {
-            document.getElementById('admin-menu-list').innerHTML = siteData.menu.map(m => `
-                <div class="bg-white/5 p-4 border border-white/10 flex items-center space-x-4 group">
-                    <img src="${m.img}" class="w-20 h-20 object-cover">
-                    <div class="flex-grow">
-                        <h5 class="text-white text-sm font-semibold">${m.title}</h5>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">${m.tag}</p>
-                    </div>
-                    <div class="opacity-0 group-hover:opacity-100 transition-opacity space-x-4">
-                        <button onclick="openMenuModal(${m.id})" class="text-gold text-[10px] uppercase">Edit</button>
-                        <button onclick="deleteMenu(${m.id})" class="text-red-500 text-[10px] uppercase">Remove</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function openMenuModal(id = null) {
-            document.getElementById('menu-modal').classList.remove('hidden');
-            if(id) {
-                const m = siteData.menu.find(x => x.id === id);
-                ['id','tag','title','desc','img'].forEach(k => document.getElementById(`m-${k}`).value = m[k]);
-            } else {
-                ['id','tag','title','desc','img'].forEach(k => document.getElementById(`m-${k}`).value = "");
-            }
-        }
-
-        function saveMenuItem() {
-            const id = document.getElementById('m-id').value;
-            const item = {
-                id: id ? parseInt(id) : Date.now(),
-                tag: document.getElementById('m-tag').value,
-                title: document.getElementById('m-title').value,
-                desc: document.getElementById('m-desc').value,
-                img: document.getElementById('m-img').value
-            };
-            if(id) siteData.menu[siteData.menu.findIndex(x=>x.id===parseInt(id))] = item;
-            else siteData.menu.push(item);
-            renderAdminMenu(); closeModals();
-        }
-
-        function deleteMenu(id) { siteData.menu = siteData.menu.filter(m => m.id !== id); renderAdminMenu(); }
-
-        function renderAdminGallery() {
-            document.getElementById('admin-gallery-list').innerHTML = siteData.gallery.map(g => `
-                <div class="relative aspect-square group">
-                    <img src="${g.img}" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button onclick="deleteGallery(${g.id})" class="text-red-500 text-[9px] uppercase font-bold tracking-tighter">Remove</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function openGalleryModal() { document.getElementById('gallery-modal').classList.remove('hidden'); }
-
-        function saveGalleryItem() {
-            const item = {
-                id: Date.now(),
-                img: document.getElementById('g-img').value,
-                caption: document.getElementById('g-caption').value || ""
-            };
-            siteData.gallery.push(item);
-            renderAdminGallery(); closeModals(); updateStats();
-        }
-
-        function deleteGallery(id) {
-            siteData.gallery = siteData.gallery.filter(g => g.id !== id);
-            renderAdminGallery();
-            updateStats();
-        }
-
-        // Public View Sync
         function syncPublicUI() {
             document.getElementById('hero-title-text').innerText = siteData.hero.title;
             document.getElementById('hero-sub-text').innerText = siteData.hero.sub;
             document.getElementById('hero-tagline-text').innerText = siteData.hero.tagline;
             document.getElementById('hero-img-bg').src = siteData.hero.img;
-            
             document.getElementById('about-tag').innerText = siteData.about.tag;
             document.getElementById('about-title-text').innerText = siteData.about.title;
             document.getElementById('about-desc-text').innerText = siteData.about.desc;
             document.getElementById('about-img').src = siteData.about.img;
-
+            
             document.getElementById('footer-address').innerText = siteData.contact.address;
             document.getElementById('footer-phone').innerText = siteData.contact.phone;
             document.getElementById('footer-email').innerText = siteData.contact.email;
             document.getElementById('footer-hours-week').innerText = siteData.contact.hoursWeek;
             document.getElementById('footer-hours-weekend').innerText = siteData.contact.hoursWeekend;
 
-            // Team Sync
             document.getElementById('public-team-grid').innerHTML = siteData.team.map(t => `
                 <div class="chef-card reveal group">
-                    <div class="aspect-[3/4] overflow-hidden">
-                        <img src="${t.img}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
-                    </div>
+                    <div class="aspect-[3/4] overflow-hidden"><img src="${t.img}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"></div>
                     <div class="p-8">
                         <span class="text-[9px] text-gold uppercase tracking-[0.3em] font-light mb-2 block">${t.role}</span>
                         <h4 class="text-3xl serif text-white mb-4">${t.name}</h4>
@@ -845,11 +583,11 @@
             `).join('');
 
             document.getElementById('public-gallery-grid').innerHTML = siteData.gallery.map(g => `
-                <div class="swiper-slide">
+                <div class="swiper-slide h-full">
                     <div class="gallery-card h-full">
                         <img src="${g.img}" class="h-full w-full object-cover">
                         <div class="absolute inset-0 opacity-0 hover:opacity-100 bg-black/40 flex items-center justify-center transition-all">
-                            <span class="text-[9px] uppercase tracking-widest text-white border border-white/20 p-2">${g.caption || 'ORAMA MOMENT'}</span>
+                            <span class="text-[9px] uppercase tracking-widest text-white border border-white/20 p-2">${g.caption || 'ORAMA'}</span>
                         </div>
                     </div>
                 </div>
@@ -867,46 +605,276 @@
                 </div>
             `).join('');
 
-            initAnimations();
             initSwiper();
+            startEntrySequence();
         }
 
-        function updateStats() {
+        // Admin Management Logic
+        function syncAdminUI() {
+            // Stats
             document.getElementById('stat-pending').innerText = siteData.reservations.filter(r => r.status === 'pending').length;
             document.getElementById('stat-blog').innerText = siteData.blog.length;
             document.getElementById('stat-team').innerText = siteData.team.length;
+
+            // Reservation List
+            document.getElementById('admin-res-list').innerHTML = siteData.reservations.map(r => `
+                <tr>
+                    <td class="p-4">${r.date} @ ${r.time}</td>
+                    <td class="p-4">${r.name}</td>
+                    <td class="p-4">${r.guests} People</td>
+                    <td class="p-4"><span class="status-pill status-${r.status}">${r.status}</span></td>
+                    <td class="p-4 space-x-2">
+                        ${r.status === 'pending' ? `<button onclick="confirmBooking('${r.id}')" class="text-green-500 underline">Confirm</button>` : ''}
+                        <button onclick="deleteBooking('${r.id}')" class="text-red-500 underline">Remove</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Team Manager
+            document.getElementById('admin-team-list').innerHTML = siteData.team.map(t => `
+                <div class="bg-white/5 p-4 flex gap-4 border border-white/10">
+                    <img src="${t.img}" class="w-20 h-20 object-cover">
+                    <div class="flex-grow">
+                        <p class="text-[10px] text-gold uppercase">${t.role}</p>
+                        <h5 class="text-white serif text-lg">${t.name}</h5>
+                        <div class="mt-2 space-x-4">
+                            <button onclick='editTeamMember(${JSON.stringify(t)})' class="text-[9px] text-gray-500 uppercase">Edit</button>
+                            <button onclick="deleteTeamMember(${t.id})" class="text-[9px] text-red-500 uppercase">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Blog Manager
+            document.getElementById('admin-blog-list').innerHTML = siteData.blog.map(b => `
+                <div class="bg-white/5 p-4 flex gap-4 border border-white/10">
+                    <img src="${b.img}" class="w-20 h-20 object-cover">
+                    <div class="flex-grow">
+                        <p class="text-[10px] text-gray-500 uppercase">${b.date}</p>
+                        <h5 class="text-white serif text-lg">${b.title}</h5>
+                        <div class="mt-2 space-x-4">
+                            <button onclick='editBlogPost(${JSON.stringify(b)})' class="text-[9px] text-gray-500 uppercase">Edit</button>
+                            <button onclick="deleteBlogPost(${b.id})" class="text-[9px] text-red-500 uppercase">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Menu Manager
+            document.getElementById('admin-menu-list').innerHTML = siteData.menu.map(m => `
+                <div class="bg-white/5 p-4 flex gap-4 border border-white/10">
+                    <img src="${m.img}" class="w-16 h-16 object-cover">
+                    <div class="flex-grow">
+                        <p class="text-[9px] text-gold uppercase">${m.tag}</p>
+                        <h5 class="text-white serif text-md">${m.title}</h5>
+                        <div class="mt-1 space-x-3">
+                            <button onclick='editMenuItem(${JSON.stringify(m)})' class="text-[8px] text-gray-500 uppercase">Edit</button>
+                            <button onclick="deleteMenuItem(${m.id})" class="text-[8px] text-red-500 uppercase">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Gallery Manager
+            document.getElementById('admin-gallery-list').innerHTML = siteData.gallery.map(g => `
+                <div class="relative group aspect-square">
+                    <img src="${g.img}" class="w-full h-full object-cover opacity-60">
+                    <div class="absolute inset-0 flex items-center justify-center space-x-2 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="deleteGalleryItem(${g.id})" class="text-[9px] text-red-500 uppercase bg-black px-3 py-1 border border-red-500/20">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Site Content Inputs
+            document.getElementById('p-hero-title').value = siteData.hero.title;
+            document.getElementById('p-hero-sub').value = siteData.hero.sub;
+            document.getElementById('p-hero-tagline').value = siteData.hero.tagline;
+            document.getElementById('p-hero-img').value = siteData.hero.img;
+            document.getElementById('p-about-tag').value = siteData.about.tag;
+            document.getElementById('p-about-title').value = siteData.about.title;
+            document.getElementById('p-about-desc').value = siteData.about.desc;
+            document.getElementById('p-about-img').value = siteData.about.img;
         }
 
-        function initAnimations() {
+        // Modal Helpers
+        function openTeamModal() { document.getElementById('t-id').value = ''; document.getElementById('team-modal').classList.remove('hidden'); }
+        function editTeamMember(t) {
+            document.getElementById('t-id').value = t.id;
+            document.getElementById('t-name').value = t.name;
+            document.getElementById('t-role').value = t.role;
+            document.getElementById('t-bio').value = t.bio;
+            document.getElementById('t-img').value = t.img;
+            document.getElementById('team-modal').classList.remove('hidden');
+        }
+        function saveTeamMember() {
+            const id = document.getElementById('t-id').value;
+            const data = {
+                id: id ? parseInt(id) : Date.now(),
+                name: document.getElementById('t-name').value,
+                role: document.getElementById('t-role').value,
+                bio: document.getElementById('t-bio').value,
+                img: document.getElementById('t-img').value
+            };
+            if (id) siteData.team = siteData.team.map(x => x.id == id ? data : x);
+            else siteData.team.push(data);
+            closeModals(); syncAdminUI();
+        }
+        function deleteTeamMember(id) { siteData.team = siteData.team.filter(x => x.id != id); syncAdminUI(); }
+
+        function openBlogModal() { document.getElementById('b-id').value = ''; document.getElementById('blog-modal').classList.remove('hidden'); }
+        function editBlogPost(b) {
+            document.getElementById('b-id').value = b.id;
+            document.getElementById('b-title').value = b.title;
+            document.getElementById('b-excerpt').value = b.excerpt;
+            document.getElementById('b-content').value = b.content;
+            document.getElementById('b-img').value = b.img;
+            document.getElementById('blog-modal').classList.remove('hidden');
+        }
+        function saveBlogPost() {
+            const id = document.getElementById('b-id').value;
+            const data = {
+                id: id ? parseInt(id) : Date.now(),
+                title: document.getElementById('b-title').value,
+                excerpt: document.getElementById('b-excerpt').value,
+                content: document.getElementById('b-content').value,
+                img: document.getElementById('b-img').value,
+                date: new Date().toLocaleDateString()
+            };
+            if (id) siteData.blog = siteData.blog.map(x => x.id == id ? data : x);
+            else siteData.blog.push(data);
+            closeModals(); syncAdminUI();
+        }
+        function deleteBlogPost(id) { siteData.blog = siteData.blog.filter(x => x.id != id); syncAdminUI(); }
+
+        function openMenuModal() { document.getElementById('m-id').value = ''; document.getElementById('menu-modal').classList.remove('hidden'); }
+        function editMenuItem(m) {
+            document.getElementById('m-id').value = m.id;
+            document.getElementById('m-tag').value = m.tag;
+            document.getElementById('m-title').value = m.title;
+            document.getElementById('m-desc').value = m.desc;
+            document.getElementById('m-img').value = m.img;
+            document.getElementById('menu-modal').classList.remove('hidden');
+        }
+        function saveMenuItem() {
+            const id = document.getElementById('m-id').value;
+            const data = {
+                id: id ? parseInt(id) : Date.now(),
+                tag: document.getElementById('m-tag').value,
+                title: document.getElementById('m-title').value,
+                desc: document.getElementById('m-desc').value,
+                img: document.getElementById('m-img').value
+            };
+            if (id) siteData.menu = siteData.menu.map(x => x.id == id ? data : x);
+            else siteData.menu.push(data);
+            closeModals(); syncAdminUI();
+        }
+        function deleteMenuItem(id) { siteData.menu = siteData.menu.filter(x => x.id != id); syncAdminUI(); }
+
+        function openGalleryModal() { document.getElementById('gallery-modal').classList.remove('hidden'); }
+        function saveGalleryItem() {
+            siteData.gallery.push({
+                id: Date.now(),
+                img: document.getElementById('g-img').value,
+                caption: document.getElementById('g-caption').value
+            });
+            closeModals(); syncAdminUI();
+        }
+        function deleteGalleryItem(id) { siteData.gallery = siteData.gallery.filter(x => x.id != id); syncAdminUI(); }
+
+        function saveAllPageContent() {
+            siteData.hero.title = document.getElementById('p-hero-title').value;
+            siteData.hero.sub = document.getElementById('p-hero-sub').value;
+            siteData.hero.tagline = document.getElementById('p-hero-tagline').value;
+            siteData.hero.img = document.getElementById('p-hero-img').value;
+            siteData.about.tag = document.getElementById('p-about-tag').value;
+            siteData.about.title = document.getElementById('p-about-title').value;
+            siteData.about.desc = document.getElementById('p-about-desc').value;
+            siteData.about.img = document.getElementById('p-about-img').value;
+            alert('Page content updated successfully.');
+        }
+
+        function confirmBooking(id) { siteData.reservations = siteData.reservations.map(r => r.id == id ? {...r, status: 'confirmed'} : r); syncAdminUI(); }
+        function deleteBooking(id) { siteData.reservations = siteData.reservations.filter(r => r.id != id); syncAdminUI(); }
+
+        function handlePublicBooking(e) {
+            e.preventDefault();
+            const booking = {
+                id: Date.now().toString(),
+                date: document.getElementById('res-date').value,
+                time: document.getElementById('res-time').value,
+                guests: document.getElementById('res-guests').value,
+                name: document.getElementById('res-name').value,
+                email: document.getElementById('res-email').value,
+                status: 'pending'
+            };
+            siteData.reservations.push(booking);
+            document.getElementById('booking-msg').classList.remove('hidden');
+            e.target.reset();
+        }
+
+        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden')); }
+
+        // Animations
+        function startEntrySequence() {
             gsap.registerPlugin(ScrollTrigger);
+            const tl = gsap.timeline();
+            tl.to('#loader h2', { opacity: 0, duration: 0.5 })
+              .to('#loader', { yPercent: -100, duration: 1.2, ease: "expo.inOut" })
+              .to('#main-nav', { opacity: 1, y: 0, duration: 1, ease: "power3.out" }, "-=0.5")
+              .to('#hero-img-container', { clipPath: 'inset(0% 0% 0% 0%)', duration: 2, ease: "expo.inOut" }, "-=1")
+              .to('#hero-img-bg', { scale: 1, duration: 2.5, ease: "expo.out" }, "-=2")
+              .to('#hero-sub-text, #hero-title-text, #hero-tagline-text', { y: 0, stagger: 0.2, duration: 1.2, ease: "power4.out" }, "-=1.5");
+
+            gsap.to('#hero-img-bg', {
+                yPercent: 30,
+                scrollTrigger: { trigger: 'section', start: 'top top', end: 'bottom top', scrub: true }
+            });
+
+            initScrollAnimations();
+        }
+
+        function initScrollAnimations() {
             gsap.utils.toArray('.reveal').forEach(el => {
-                gsap.from(el, { opacity: 0, y: 50, duration: 1, scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' } });
+                gsap.from(el, {
+                    opacity: 0,
+                    y: 60,
+                    duration: 1.2,
+                    ease: "power3.out",
+                    scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' }
+                });
+            });
+
+            gsap.to('#progress-bar', {
+                width: '100%',
+                scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 0.3 }
             });
         }
 
         function initSwiper() {
             if (gallerySwiper) gallerySwiper.destroy();
             gallerySwiper = new Swiper(".atmosphereSwiper", {
-                slidesPerView: 1.1,
+                slidesPerView: 1.2,
                 centeredSlides: true,
-                spaceBetween: 20,
+                spaceBetween: 30,
                 loop: true,
-                autoplay: { delay: 4000, disableOnInteraction: false },
+                autoplay: { delay: 5000 },
                 pagination: { el: ".swiper-pagination", clickable: true },
-                breakpoints: {
-                    768: { slidesPerView: 2.2, spaceBetween: 40 }
-                }
+                breakpoints: { 768: { slidesPerView: 2.2 } }
             });
         }
 
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden')); }
-
         window.onload = () => {
             syncPublicUI();
+            
             const cursor = document.getElementById('cursor'), follower = document.getElementById('cursor-follower');
             document.addEventListener('mousemove', e => {
                 gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0 });
-                gsap.to(follower, { x: e.clientX - 20, y: e.clientY - 20, duration: 0.15 });
+                gsap.to(follower, { x: e.clientX - 20, y: e.clientY - 20, duration: 0.2 });
+            });
+
+            document.querySelectorAll('a, button, input, select').forEach(el => {
+                el.addEventListener('mouseenter', () => gsap.to(follower, { scale: 1.5, borderColor: '#c5a059', backgroundColor: 'rgba(197, 160, 89, 0.1)' }));
+                el.addEventListener('mouseleave', () => gsap.to(follower, { scale: 1, borderColor: '#c5a059', backgroundColor: 'transparent' }));
             });
         };
     </script>
