@@ -11,6 +11,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;0,600;1,400&family=Montserrat:wght@100;300;400;600&display=swap" rel="stylesheet">
 
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
     <style>
         :root {
             --gold: #c5a059;
@@ -56,16 +59,22 @@
 
         .glass-nav { background: rgba(7, 7, 7, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
 
-        .menu-card, .gallery-card, .blog-card { position: relative; overflow: hidden; background: #111; transition: all 0.6s ease; }
-        .blog-card { aspect-ratio: 16/9; }
-        .menu-card img, .gallery-card img, .blog-card img { transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; height: 100%; object-fit: cover; }
-        .menu-card:hover img, .gallery-card:hover img, .blog-card:hover img { transform: scale(1.05); }
+        .menu-card, .gallery-card, .blog-card, .chef-card { position: relative; overflow: hidden; background: #111; transition: all 0.6s ease; }
+        .chef-card { border: 1px solid rgba(197, 160, 89, 0.1); }
+        .menu-card img, .gallery-card img, .blog-card img, .chef-card img { transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; height: 100%; object-fit: cover; }
+        .menu-card:hover img, .gallery-card:hover img, .blog-card:hover img, .chef-card:hover img { transform: scale(1.05); }
         
         .tag { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(197, 160, 89, 0.3); padding: 4px 12px; border-radius: 100px; display: inline-block; }
         
-        .food-grid, .gallery-grid, .blog-grid { display: grid; gap: 2rem; }
+        .food-grid, .blog-grid, .team-grid { display: grid; gap: 2rem; }
         .food-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-        .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        .team-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+        /* Swiper Customization */
+        .swiper { width: 100%; padding-bottom: 50px !important; }
+        .swiper-slide { width: auto; max-width: 800px; height: 60vh; }
+        .swiper-pagination-bullet { background: var(--gold) !important; opacity: 0.3; }
+        .swiper-pagination-bullet-active { opacity: 1; }
 
         /* --- ADMIN CONSOLE STYLES --- */
         #admin-console { display: none; background: var(--admin-bg); min-height: 100vh; color: #ccc; }
@@ -103,6 +112,7 @@
                 <a href="#top">Home</a>
                 <a href="#about">About</a>
                 <a href="#menu">Cuisine</a>
+                <a href="#team">Team</a>
                 <a href="#gallery">Atmosphere</a>
                 <a href="#journal">Journal</a>
                 <a href="#booking">Reservations</a>
@@ -139,6 +149,17 @@
             </div>
         </section>
 
+        <!-- Team Section -->
+        <section id="team" class="py-32 px-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-24 text-center reveal">
+                    <div class="tag mb-6">Master Craftsmen</div>
+                    <h2 class="text-5xl md:text-7xl serif">The Culinary Team</h2>
+                </div>
+                <div class="team-grid" id="public-team-grid"></div>
+            </div>
+        </section>
+
         <!-- Menu Section -->
         <section id="menu" class="py-32 px-6 bg-white/[0.02]">
             <div class="max-w-7xl mx-auto">
@@ -150,14 +171,18 @@
             </div>
         </section>
 
-        <!-- Gallery Section -->
-        <section id="gallery" class="py-32 px-6">
-            <div class="max-w-7xl mx-auto">
-                <div class="mb-24 text-center reveal">
-                    <div class="tag mb-6">The Atmosphere</div>
-                    <h2 class="text-5xl md:text-7xl serif">Visual Poetry</h2>
+        <!-- Gallery Section with Swiper -->
+        <section id="gallery" class="py-32 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-6 mb-16 text-center reveal">
+                <div class="tag mb-6">The Atmosphere</div>
+                <h2 class="text-5xl md:text-7xl serif">Visual Poetry</h2>
+            </div>
+            
+            <div class="swiper atmosphereSwiper reveal">
+                <div class="swiper-wrapper" id="public-gallery-grid">
+                    <!-- Swiper Slides dynamically inserted here -->
                 </div>
-                <div class="gallery-grid" id="public-gallery-grid"></div>
+                <div class="swiper-pagination"></div>
             </div>
         </section>
 
@@ -252,6 +277,7 @@
             <nav class="flex-grow space-y-2">
                 <button class="admin-btn active w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('dashboard')">Dashboard</button>
                 <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('res-mgr')">Reservations</button>
+                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('team-mgr')">Culinary Team</button>
                 <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('blog-mgr')">Journal / Blog</button>
                 <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('menu-mgr')">Menu Items</button>
                 <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('gallery-mgr')">Gallery</button>
@@ -274,8 +300,8 @@
                         <h4 class="text-4xl serif text-white" id="stat-blog">0</h4>
                     </div>
                     <div class="bg-white/5 p-8 border border-white/5">
-                        <p class="text-[10px] uppercase text-gray-500 mb-2">Gallery Photos</p>
-                        <h4 class="text-4xl serif text-white" id="stat-gallery">0</h4>
+                        <p class="text-[10px] uppercase text-gray-500 mb-2">Team Members</p>
+                        <h4 class="text-4xl serif text-white" id="stat-team">0</h4>
                     </div>
                     <div class="bg-white/5 p-8 border border-white/5">
                         <p class="text-[10px] uppercase text-gray-500 mb-2">System Status</p>
@@ -301,6 +327,15 @@
                         <tbody id="admin-res-list" class="divide-y divide-white/5"></tbody>
                     </table>
                 </div>
+            </div>
+
+            <!-- Team Manager -->
+            <div id="team-mgr" class="tab-content space-y-8">
+                <div class="flex justify-between items-center">
+                    <h2 class="serif text-white text-4xl">The Team</h2>
+                    <button onclick="openTeamModal()" class="bg-gold text-dark px-6 py-2 text-[10px] font-bold uppercase">New Member</button>
+                </div>
+                <div id="admin-team-list" class="grid grid-cols-2 gap-6"></div>
             </div>
 
             <!-- Blog Manager -->
@@ -377,6 +412,24 @@
     </div>
 
     <!-- MODALS -->
+    <!-- Team Member Modal -->
+    <div id="team-modal" class="fixed inset-0 z-[200] modal-overlay hidden flex items-center justify-center p-6">
+        <div class="bg-black border border-gold/30 w-full max-w-2xl p-10 space-y-6">
+            <h3 class="serif text-gold text-3xl">Team Member Profile</h3>
+            <input type="hidden" id="t-id">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="input-group"><label>Name</label><input type="text" id="t-name"></div>
+                <div class="input-group"><label>Role / Position</label><input type="text" id="t-role"></div>
+            </div>
+            <div class="input-group"><label>Bio / Background</label><textarea id="t-bio" rows="4"></textarea></div>
+            <div class="input-group"><label>Profile Image URL</label><input type="text" id="t-img"></div>
+            <div class="flex space-x-4">
+                <button onclick="saveTeamMember()" class="flex-grow bg-gold text-dark py-4 text-[10px] font-bold uppercase">Save Profile</button>
+                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Blog Modal -->
     <div id="blog-modal" class="fixed inset-0 z-[200] modal-overlay hidden flex items-center justify-center p-6">
         <div class="bg-black border border-gold/30 w-full max-w-2xl p-10 space-y-6">
@@ -424,6 +477,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <script>
         // Initial Data Structure
@@ -447,6 +501,11 @@
                 hoursWeek: "Mon - Fri: 18:30 - 23:30",
                 hoursWeekend: "Sat - Sun: 12:00 - 00:00"
             },
+            team: [
+                { id: 1, name: "Alessandro Rossi", role: "Executive Chef", bio: "With over 20 years in Michelin-starred kitchens, Alessandro brings a scientific approach to classic Italian flavors.", img: "https://images.unsplash.com/photo-1583394238712-92d44443c5a0?auto=format&fit=crop&q=80&w=800" },
+                { id: 2, name: "Elena Valenti", role: "Head Sommelier", bio: "A master of rare vintages, Elena curates a cellar that spans 400 years of viticulture history.", img: "https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?auto=format&fit=crop&q=80&w=800" },
+                { id: 3, name: "Luca Moretti", role: "Pastry Architect", bio: "Luca transforms sugar and flour into geometric masterpieces that challenge the perception of dessert.", img: "https://images.unsplash.com/photo-1614436163996-25cee5f54290?auto=format&fit=crop&q=80&w=800" }
+            ],
             menu: [
                 { id: 1, tag: "Vegetal", title: "The Botanist", desc: "Wild Roman Herbs, Goat Curd", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800" },
                 { id: 2, tag: "Sea", title: "Tyrrhenian Blue", desc: "Line-caught Seabass, Kelp Foam", img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&q=80&w=800" }
@@ -464,6 +523,8 @@
                 { id: 1, date: "2026-02-14", time: "20:00", name: "Marcello Russo", email: "marcello@italy.it", guests: 2, status: "confirmed" }
             ]
         };
+
+        let gallerySwiper;
 
         // UI View Toggling
         function toggleView(viewId) {
@@ -496,6 +557,7 @@
             event.currentTarget.classList.add('active');
             
             if(tabId === 'res-mgr') renderAdminReservations();
+            if(tabId === 'team-mgr') renderAdminTeam();
             if(tabId === 'blog-mgr') renderAdminBlog();
             if(tabId === 'menu-mgr') renderAdminMenu();
             if(tabId === 'gallery-mgr') renderAdminGallery();
@@ -504,18 +566,59 @@
 
         // --- CMS LOGIC ---
 
+        // Team Management
+        function renderAdminTeam() {
+            document.getElementById('admin-team-list').innerHTML = siteData.team.map(t => `
+                <div class="bg-white/5 p-4 border border-white/10 flex items-center space-x-4 group">
+                    <img src="${t.img}" class="w-16 h-16 rounded-full object-cover">
+                    <div class="flex-grow">
+                        <h5 class="text-white text-sm font-semibold">${t.name}</h5>
+                        <p class="text-[10px] text-gold uppercase tracking-widest">${t.role}</p>
+                    </div>
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity space-x-4">
+                        <button onclick="openTeamModal(${t.id})" class="text-gold text-[10px] uppercase">Edit</button>
+                        <button onclick="deleteTeamMember(${t.id})" class="text-red-500 text-[10px] uppercase">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openTeamModal(id = null) {
+            document.getElementById('team-modal').classList.remove('hidden');
+            if(id) {
+                const t = siteData.team.find(x => x.id === id);
+                ['id','name','role','bio','img'].forEach(k => document.getElementById(`t-${k}`).value = t[k]);
+            } else {
+                ['id','name','role','bio','img'].forEach(k => document.getElementById(`t-${k}`).value = "");
+            }
+        }
+
+        function saveTeamMember() {
+            const id = document.getElementById('t-id').value;
+            const member = {
+                id: id ? parseInt(id) : Date.now(),
+                name: document.getElementById('t-name').value,
+                role: document.getElementById('t-role').value,
+                bio: document.getElementById('t-bio').value,
+                img: document.getElementById('t-img').value
+            };
+            if(id) siteData.team[siteData.team.findIndex(x=>x.id===parseInt(id))] = member;
+            else siteData.team.push(member);
+            renderAdminTeam(); closeModals(); updateStats();
+        }
+
+        function deleteTeamMember(id) { siteData.team = siteData.team.filter(t=>t.id!==id); renderAdminTeam(); updateStats(); }
+
+        // Rest of CMS
         function loadPageContentFields() {
-            // Hero
             document.getElementById('p-hero-title').value = siteData.hero.title;
             document.getElementById('p-hero-sub').value = siteData.hero.sub;
             document.getElementById('p-hero-tagline').value = siteData.hero.tagline;
             document.getElementById('p-hero-img').value = siteData.hero.img;
-            // About
             document.getElementById('p-about-tag').value = siteData.about.tag;
             document.getElementById('p-about-title').value = siteData.about.title;
             document.getElementById('p-about-desc').value = siteData.about.desc;
             document.getElementById('p-about-img').value = siteData.about.img;
-            // Contact
             document.getElementById('p-contact-addr').value = siteData.contact.address;
             document.getElementById('p-contact-phone').value = siteData.contact.phone;
             document.getElementById('p-contact-email').value = siteData.contact.email;
@@ -524,27 +627,22 @@
         }
 
         function saveAllPageContent() {
-            // Hero
             siteData.hero.title = document.getElementById('p-hero-title').value;
             siteData.hero.sub = document.getElementById('p-hero-sub').value;
             siteData.hero.tagline = document.getElementById('p-hero-tagline').value;
             siteData.hero.img = document.getElementById('p-hero-img').value;
-            // About
             siteData.about.tag = document.getElementById('p-about-tag').value;
             siteData.about.title = document.getElementById('p-about-title').value;
             siteData.about.desc = document.getElementById('p-about-desc').value;
             siteData.about.img = document.getElementById('p-about-img').value;
-            // Contact
             siteData.contact.address = document.getElementById('p-contact-addr').value;
             siteData.contact.phone = document.getElementById('p-contact-phone').value;
             siteData.contact.email = document.getElementById('p-contact-email').value;
             siteData.contact.hoursWeek = document.getElementById('p-hours-week').value;
             siteData.contact.hoursWeekend = document.getElementById('p-hours-weekend').value;
-            
-            alert('Website content successfully updated.');
+            alert('Website content updated.');
         }
 
-        // Reservations
         function handlePublicBooking(e) {
             e.preventDefault();
             const booking = {
@@ -564,7 +662,7 @@
         function renderAdminReservations() {
             document.getElementById('admin-res-list').innerHTML = siteData.reservations.map(r => `
                 <tr>
-                    <td class="p-4">${r.date} @ ${r.time}</td>
+                    <td class="p-4 text-gray-400">${r.date} @ ${r.time}</td>
                     <td class="p-4 font-semibold text-white">${r.name}<br><span class="opacity-40 text-[8px] font-normal uppercase">${r.email}</span></td>
                     <td class="p-4 text-gold">${r.guests} Guests</td>
                     <td class="p-4"><span class="status-pill status-${r.status}">${r.status}</span></td>
@@ -589,7 +687,6 @@
             updateStats();
         }
 
-        // Blog
         function renderAdminBlog() {
             document.getElementById('admin-blog-list').innerHTML = siteData.blog.map(b => `
                 <div class="bg-white/5 p-4 border border-white/10 flex items-center space-x-4 group">
@@ -633,7 +730,6 @@
 
         function deleteBlog(id) { siteData.blog = siteData.blog.filter(b=>b.id!==id); renderAdminBlog(); updateStats(); }
 
-        // Menu
         function renderAdminMenu() {
             document.getElementById('admin-menu-list').innerHTML = siteData.menu.map(m => `
                 <div class="bg-white/5 p-4 border border-white/10 flex items-center space-x-4 group">
@@ -676,7 +772,6 @@
 
         function deleteMenu(id) { siteData.menu = siteData.menu.filter(m => m.id !== id); renderAdminMenu(); }
 
-        // Gallery
         function renderAdminGallery() {
             document.getElementById('admin-gallery-list').innerHTML = siteData.gallery.map(g => `
                 <div class="relative aspect-square group">
@@ -708,7 +803,6 @@
 
         // Public View Sync
         function syncPublicUI() {
-            // Text Elements
             document.getElementById('hero-title-text').innerText = siteData.hero.title;
             document.getElementById('hero-sub-text').innerText = siteData.hero.sub;
             document.getElementById('hero-tagline-text').innerText = siteData.hero.tagline;
@@ -719,14 +813,26 @@
             document.getElementById('about-desc-text').innerText = siteData.about.desc;
             document.getElementById('about-img').src = siteData.about.img;
 
-            // Footer Elements
             document.getElementById('footer-address').innerText = siteData.contact.address;
             document.getElementById('footer-phone').innerText = siteData.contact.phone;
             document.getElementById('footer-email').innerText = siteData.contact.email;
             document.getElementById('footer-hours-week').innerText = siteData.contact.hoursWeek;
             document.getElementById('footer-hours-weekend').innerText = siteData.contact.hoursWeekend;
 
-            // Menu Grid
+            // Team Sync
+            document.getElementById('public-team-grid').innerHTML = siteData.team.map(t => `
+                <div class="chef-card reveal group">
+                    <div class="aspect-[3/4] overflow-hidden">
+                        <img src="${t.img}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+                    </div>
+                    <div class="p-8">
+                        <span class="text-[9px] text-gold uppercase tracking-[0.3em] font-light mb-2 block">${t.role}</span>
+                        <h4 class="text-3xl serif text-white mb-4">${t.name}</h4>
+                        <p class="text-xs text-gray-500 leading-relaxed font-light">${t.bio}</p>
+                    </div>
+                </div>
+            `).join('');
+
             document.getElementById('public-menu-grid').innerHTML = siteData.menu.map(m => `
                 <div class="menu-card reveal">
                     <img src="${m.img}">
@@ -738,17 +844,17 @@
                 </div>
             `).join('');
 
-            // Gallery Grid
             document.getElementById('public-gallery-grid').innerHTML = siteData.gallery.map(g => `
-                <div class="gallery-card reveal">
-                    <img src="${g.img}">
-                    <div class="absolute inset-0 opacity-0 hover:opacity-100 bg-black/40 flex items-center justify-center transition-all">
-                        <span class="text-[9px] uppercase tracking-widest text-white border border-white/20 p-2">${g.caption || 'ORAMA MOMENT'}</span>
+                <div class="swiper-slide">
+                    <div class="gallery-card h-full">
+                        <img src="${g.img}" class="h-full w-full object-cover">
+                        <div class="absolute inset-0 opacity-0 hover:opacity-100 bg-black/40 flex items-center justify-center transition-all">
+                            <span class="text-[9px] uppercase tracking-widest text-white border border-white/20 p-2">${g.caption || 'ORAMA MOMENT'}</span>
+                        </div>
                     </div>
                 </div>
             `).join('');
 
-            // Blog Grid
             document.getElementById('public-blog-grid').innerHTML = siteData.blog.map(b => `
                 <div class="blog-card reveal group">
                     <img src="${b.img}">
@@ -762,18 +868,34 @@
             `).join('');
 
             initAnimations();
+            initSwiper();
         }
 
         function updateStats() {
             document.getElementById('stat-pending').innerText = siteData.reservations.filter(r => r.status === 'pending').length;
             document.getElementById('stat-blog').innerText = siteData.blog.length;
-            document.getElementById('stat-gallery').innerText = siteData.gallery.length;
+            document.getElementById('stat-team').innerText = siteData.team.length;
         }
 
         function initAnimations() {
             gsap.registerPlugin(ScrollTrigger);
             gsap.utils.toArray('.reveal').forEach(el => {
                 gsap.from(el, { opacity: 0, y: 50, duration: 1, scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' } });
+            });
+        }
+
+        function initSwiper() {
+            if (gallerySwiper) gallerySwiper.destroy();
+            gallerySwiper = new Swiper(".atmosphereSwiper", {
+                slidesPerView: 1.1,
+                centeredSlides: true,
+                spaceBetween: 20,
+                loop: true,
+                autoplay: { delay: 4000, disableOnInteraction: false },
+                pagination: { el: ".swiper-pagination", clickable: true },
+                breakpoints: {
+                    768: { slidesPerView: 2.2, spaceBetween: 40 }
+                }
             });
         }
 
