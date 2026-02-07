@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORAMA | Fine Dining & Management</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;0,600;1,400&family=Montserrat:wght@100;300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --gold: #c5a059;
+            --dark: #070707;
+            --cream: #f4f1ea;
+            --admin-bg: #121212;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body.public-view { cursor: none !important; }
+        body.public-view * { cursor: none !important; }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--cream);
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* --- PUBLIC SITE STYLES --- */
+        .bg-canvas { position: fixed; inset: 0; z-index: -2; background-color: var(--dark); }
+        .bg-grain { position: fixed; inset: 0; z-index: -1; opacity: 0.3; pointer-events: none; background-image: url("https://www.transparenttextures.com/patterns/stardust.png"); }
+        
+        h1, h2, h3, h4, .serif { font-family: 'Cormorant Garamond', serif; letter-spacing: -0.01em; }
+
+        .text-gold { color: var(--gold); }
+        .bg-gold { background-color: var(--gold); }
+        
+        #cursor { position: fixed; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 10001; mix-blend-mode: difference; display: none; }
+        #cursor-follower { position: fixed; width: 40px; height: 40px; border: 1px solid var(--gold); border-radius: 50%; pointer-events: none; z-index: 10000; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: none; }
+        
+        body.public-view #cursor, body.public-view #cursor-follower { display: block; }
+
+        #progress-bar { position: fixed; top: 0; left: 0; height: 2px; background: var(--gold); z-index: 100; width: 0%; }
+
+        .glass-nav { background: rgba(7, 7, 7, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+
+        .menu-card, .gallery-card, .blog-card { position: relative; overflow: hidden; background: #111; transition: all 0.6s ease; }
+        .blog-card { aspect-ratio: 16/9; }
+        .menu-card img, .gallery-card img, .blog-card img { transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; height: 100%; object-fit: cover; }
+        .menu-card:hover img, .gallery-card:hover img, .blog-card:hover img { transform: scale(1.05); }
+        
+        .tag { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(197, 160, 89, 0.3); padding: 4px 12px; border-radius: 100px; display: inline-block; }
+        
+        .food-grid, .gallery-grid, .blog-grid { display: grid; gap: 2rem; }
+        .food-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+        .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+        /* --- ADMIN CONSOLE STYLES --- */
+        #admin-console { display: none; background: var(--admin-bg); min-height: 100vh; color: #ccc; }
+        .admin-sidebar { background: #000; border-right: 1px solid #333; }
+        .admin-btn { transition: all 0.2s; border-radius: 4px; border: none; outline: none; }
+        .admin-btn:hover { background: #222; color: var(--gold); }
+        .admin-btn.active { background: var(--gold); color: #000; }
+        .input-group input, .input-group textarea, .input-group select {
+            background: #1e1e1e; border: 1px solid #333; color: white; padding: 10px; width: 100%; border-radius: 4px; font-size: 13px;
+        }
+        .input-group label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; color: #888; font-weight: 600; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .modal-overlay { background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); }
+
+        .status-pill { padding: 2px 8px; border-radius: 100px; font-size: 10px; text-transform: uppercase; }
+        .status-pending { background: rgba(255, 165, 0, 0.2); color: orange; }
+        .status-confirmed { background: rgba(0, 255, 0, 0.2); color: #00ff00; }
+    </style>
+</head>
+<body id="top" class="public-view">
+
+    <!-- PUBLIC SITE -->
+    <div id="site-wrapper">
+        <div class="bg-canvas"></div>
+        <div class="bg-grain"></div>
+        <div id="progress-bar"></div>
+        <div id="cursor"></div>
+        <div id="cursor-follower"></div>
+
+        <nav class="fixed w-full z-50 glass-nav border-b border-white/5 py-5 px-6 md:px-12 flex justify-between items-center">
+            <a href="#top" class="text-2xl font-light tracking-[0.3em] text-gold serif" id="nav-logo">ORAMA</a>
+            <div class="hidden lg:flex space-x-12 text-[10px] uppercase tracking-[0.3em] font-light">
+                <a href="#top">Home</a>
+                <a href="#about">About</a>
+                <a href="#menu">Cuisine</a>
+                <a href="#gallery">Atmosphere</a>
+                <a href="#journal">Journal</a>
+                <a href="#booking">Reservations</a>
+            </div>
+            <a href="#booking" class="bg-gold/10 border border-gold/50 text-gold px-8 py-2 text-[10px] uppercase tracking-widest hover:bg-gold hover:text-white transition-all">
+                Book a Table
+            </a>
+        </nav>
+
+        <!-- Hero -->
+        <section class="relative h-screen flex items-center justify-center overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <img src="" class="w-full h-full object-cover" id="hero-img-bg">
+                <div class="absolute inset-0 bg-black/50"></div>
+            </div>
+            <div class="relative z-10 text-center px-4">
+                <h4 class="text-gold uppercase tracking-[0.8em] text-[10px] mb-6" id="hero-sub-text"></h4>
+                <h1 class="text-7xl md:text-[10rem] font-extralight mb-6 leading-none" id="hero-title-text"></h1>
+                <p class="max-w-2xl mx-auto text-[10px] md:text-xs text-gray-300 font-light tracking-[0.4em] uppercase" id="hero-tagline-text"></p>
+            </div>
+        </section>
+
+        <!-- Heritage Section -->
+        <section id="about" class="py-32 px-6">
+            <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-24 items-center">
+                <div class="reveal">
+                    <div class="tag mb-6" id="about-tag"></div>
+                    <h2 class="text-5xl md:text-7xl serif mb-10 leading-tight" id="about-title-text"></h2>
+                    <p class="text-gray-400 font-light leading-relaxed mb-8 text-lg" id="about-desc-text"></p>
+                </div>
+                <div class="reveal">
+                    <img src="" id="about-img" class="w-full grayscale hover:grayscale-0 transition-all duration-1000 shadow-2xl">
+                </div>
+            </div>
+        </section>
+
+        <!-- Menu Section -->
+        <section id="menu" class="py-32 px-6 bg-white/[0.02]">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-24 text-center reveal">
+                    <div class="tag mb-6">Signature Selection</div>
+                    <h2 class="text-5xl md:text-7xl serif">The Seasonal Menu</h2>
+                </div>
+                <div class="food-grid" id="public-menu-grid"></div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="py-32 px-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-24 text-center reveal">
+                    <div class="tag mb-6">The Atmosphere</div>
+                    <h2 class="text-5xl md:text-7xl serif">Visual Poetry</h2>
+                </div>
+                <div class="gallery-grid" id="public-gallery-grid"></div>
+            </div>
+        </section>
+
+        <!-- Journal (Blog) Section -->
+        <section id="journal" class="py-32 px-6 bg-white/[0.02]">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-24 text-center reveal">
+                    <div class="tag mb-6">Culinary Stories</div>
+                    <h2 class="text-5xl md:text-7xl serif">The Journal</h2>
+                </div>
+                <div class="blog-grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" id="public-blog-grid"></div>
+            </div>
+        </section>
+
+        <!-- Reservation Section -->
+        <section id="booking" class="py-32 px-6">
+            <div class="max-w-3xl mx-auto text-center reveal">
+                <div class="tag mb-6">Join Us</div>
+                <h2 class="text-5xl md:text-7xl serif mb-12">Secure a Table</h2>
+                <form id="reservation-form" class="space-y-6 text-left" onsubmit="handlePublicBooking(event)">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="input-group"><label>Date</label><input type="date" id="res-date" required></div>
+                        <div class="input-group">
+                            <label>Time</label>
+                            <select id="res-time" required>
+                                <option value="18:30">18:30</option>
+                                <option value="19:00">19:00</option>
+                                <option value="20:00">20:00</option>
+                                <option value="21:30">21:30</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="input-group"><label>Guests</label><input type="number" id="res-guests" min="1" max="10" value="2" required></div>
+                        <div class="input-group"><label>Full Name</label><input type="text" id="res-name" placeholder="John Doe" required></div>
+                    </div>
+                    <div class="input-group"><label>Email Address</label><input type="email" id="res-email" placeholder="john@example.com" required></div>
+                    <button type="submit" class="w-full bg-gold text-dark py-5 text-xs font-bold tracking-[0.3em] hover:bg-white transition-all">REQUEST RESERVATION</button>
+                    <p id="booking-msg" class="text-center text-[10px] text-gold mt-4 uppercase hidden">Request sent. We will contact you shortly.</p>
+                </form>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="pt-32 pb-12 px-6 md:px-24 border-t border-white/5 bg-black/50">
+            <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-16 mb-24 uppercase tracking-[0.2em] text-[10px]">
+                <div>
+                    <h5 class="text-gold mb-6">Contact</h5>
+                    <p class="mb-2" id="footer-address"></p>
+                    <p class="mb-2" id="footer-phone"></p>
+                    <p id="footer-email"></p>
+                </div>
+                <div>
+                    <h5 class="text-gold mb-6">Hours</h5>
+                    <p class="mb-2" id="footer-hours-week"></p>
+                    <p id="footer-hours-weekend"></p>
+                </div>
+                <div>
+                    <h5 class="text-gold mb-6">Social</h5>
+                    <div class="flex space-x-6">
+                        <a href="#" class="hover:text-gold transition-colors">Instagram</a>
+                        <a href="#" class="hover:text-gold transition-colors">Twitter</a>
+                    </div>
+                </div>
+            </div>
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-[9px] text-gray-700 uppercase tracking-[0.5em]">
+                <div>&copy; 2026 ORAMA GROUP</div>
+                <button onclick="toggleView('admin-auth')" class="text-gold hover:text-white transition-colors cursor-pointer">ADMIN ACCESS</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ADMIN AUTH -->
+    <div id="admin-auth" class="fixed inset-0 z-[100] bg-black hidden flex items-center justify-center p-6">
+        <div class="w-full max-w-md space-y-8">
+            <div class="text-center">
+                <h2 class="serif text-gold text-4xl mb-2">Internal Access</h2>
+                <p class="text-[9px] tracking-widest text-gray-500 uppercase">Authorized Personnel Only</p>
+            </div>
+            <div class="space-y-4">
+                <div class="input-group"><label>Passcode</label><input type="password" id="admin-pass" value="1234"></div>
+                <button onclick="checkAuth()" class="w-full bg-gold text-dark py-4 text-xs font-bold tracking-widest">SIGN IN</button>
+                <button onclick="toggleView('site-wrapper')" class="w-full text-[9px] text-gray-500 uppercase">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN CONSOLE -->
+    <div id="admin-console" class="flex">
+        <div class="w-64 admin-sidebar h-screen sticky top-0 flex flex-col p-6">
+            <h3 class="serif text-gold text-2xl mb-8">ORAMA CMS</h3>
+            <nav class="flex-grow space-y-2">
+                <button class="admin-btn active w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('dashboard')">Dashboard</button>
+                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('res-mgr')">Reservations</button>
+                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('blog-mgr')">Journal / Blog</button>
+                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('menu-mgr')">Menu Items</button>
+                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('gallery-mgr')">Gallery</button>
+                <button class="admin-btn w-full text-left p-3 text-xs tracking-widest uppercase" onclick="showTab('site-content')">Page Content</button>
+            </nav>
+            <button onclick="logout()" class="mt-auto text-[10px] text-red-500 uppercase tracking-widest">Exit</button>
+        </div>
+
+        <div class="flex-grow p-12 overflow-y-auto max-h-screen">
+            <!-- Dashboard -->
+            <div id="dashboard" class="tab-content active space-y-8">
+                <h2 class="serif text-white text-5xl">Overview</h2>
+                <div class="grid grid-cols-4 gap-6">
+                    <div class="bg-white/5 p-8 border border-white/5">
+                        <p class="text-[10px] uppercase text-gray-500 mb-2">Pending Bookings</p>
+                        <h4 class="text-4xl serif text-white" id="stat-pending">0</h4>
+                    </div>
+                    <div class="bg-white/5 p-8 border border-white/5">
+                        <p class="text-[10px] uppercase text-gray-500 mb-2">Journal Entries</p>
+                        <h4 class="text-4xl serif text-white" id="stat-blog">0</h4>
+                    </div>
+                    <div class="bg-white/5 p-8 border border-white/5">
+                        <p class="text-[10px] uppercase text-gray-500 mb-2">Gallery Photos</p>
+                        <h4 class="text-4xl serif text-white" id="stat-gallery">0</h4>
+                    </div>
+                    <div class="bg-white/5 p-8 border border-white/5">
+                        <p class="text-[10px] uppercase text-gray-500 mb-2">System Status</p>
+                        <h4 class="text-xl serif text-green-500">Operational</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reservation Manager -->
+            <div id="res-mgr" class="tab-content space-y-8">
+                <h2 class="serif text-white text-4xl">Reservations</h2>
+                <div class="bg-black border border-white/10 overflow-hidden">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-white/5 uppercase text-[9px] text-gray-500">
+                            <tr>
+                                <th class="p-4">Date/Time</th>
+                                <th class="p-4">Guest</th>
+                                <th class="p-4">Party</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-res-list" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Blog Manager -->
+            <div id="blog-mgr" class="tab-content space-y-8">
+                <div class="flex justify-between items-center">
+                    <h2 class="serif text-white text-4xl">Journal Posts</h2>
+                    <button onclick="openBlogModal()" class="bg-gold text-dark px-6 py-2 text-[10px] font-bold uppercase">New Post</button>
+                </div>
+                <div id="admin-blog-list" class="grid grid-cols-2 gap-6"></div>
+            </div>
+
+            <!-- Menu Manager -->
+            <div id="menu-mgr" class="tab-content space-y-8">
+                <div class="flex justify-between items-center">
+                    <h2 class="serif text-white text-4xl">The Menu</h2>
+                    <button onclick="openMenuModal()" class="bg-gold text-dark px-6 py-2 text-[10px] font-bold uppercase">Add Item</button>
+                </div>
+                <div id="admin-menu-list" class="grid grid-cols-2 gap-4"></div>
+            </div>
+
+            <!-- Gallery Manager -->
+            <div id="gallery-mgr" class="tab-content space-y-8">
+                <div class="flex justify-between items-center">
+                    <h2 class="serif text-white text-4xl">Gallery Media</h2>
+                    <button onclick="openGalleryModal()" class="bg-gold text-dark px-6 py-2 text-[10px] font-bold uppercase">Add Photo</button>
+                </div>
+                <div id="admin-gallery-list" class="grid grid-cols-4 gap-4"></div>
+            </div>
+
+            <!-- Site Content Editor -->
+            <div id="site-content" class="tab-content space-y-12">
+                <div class="flex justify-between items-center">
+                    <h2 class="serif text-white text-4xl">Global Site Content</h2>
+                    <button onclick="saveAllPageContent()" class="bg-gold text-dark px-10 py-3 text-[10px] font-bold uppercase hover:bg-white transition-all">Save All Changes</button>
+                </div>
+
+                <!-- Hero Section -->
+                <div class="bg-white/5 p-8 border border-white/5 space-y-6">
+                    <h4 class="text-gold uppercase tracking-widest text-[10px] font-bold">1. Hero Section</h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="input-group"><label>Hero Title</label><input type="text" id="p-hero-title"></div>
+                        <div class="input-group"><label>Hero Subtitle</label><input type="text" id="p-hero-sub"></div>
+                    </div>
+                    <div class="input-group"><label>Hero Tagline</label><input type="text" id="p-hero-tagline"></div>
+                    <div class="input-group"><label>Hero Image URL</label><input type="text" id="p-hero-img"></div>
+                </div>
+
+                <!-- About Section -->
+                <div class="bg-white/5 p-8 border border-white/5 space-y-6">
+                    <h4 class="text-gold uppercase tracking-widest text-[10px] font-bold">2. Heritage Section</h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="input-group"><label>Section Tag</label><input type="text" id="p-about-tag"></div>
+                        <div class="input-group"><label>Section Title</label><input type="text" id="p-about-title"></div>
+                    </div>
+                    <div class="input-group"><label>Description Text</label><textarea id="p-about-desc" rows="4"></textarea></div>
+                    <div class="input-group"><label>Section Image URL</label><input type="text" id="p-about-img"></div>
+                </div>
+
+                <!-- Contact & Footer Section -->
+                <div class="bg-white/5 p-8 border border-white/5 space-y-6">
+                    <h4 class="text-gold uppercase tracking-widest text-[10px] font-bold">3. Contact & Hours</h4>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="input-group"><label>Address</label><input type="text" id="p-contact-addr"></div>
+                        <div class="input-group"><label>Phone</label><input type="text" id="p-contact-phone"></div>
+                        <div class="input-group"><label>Email</label><input type="text" id="p-contact-email"></div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="input-group"><label>Mon-Fri Hours</label><input type="text" id="p-hours-week"></div>
+                        <div class="input-group"><label>Sat-Sun Hours</label><input type="text" id="p-hours-weekend"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Blog Modal -->
+    <div id="blog-modal" class="fixed inset-0 z-[200] modal-overlay hidden flex items-center justify-center p-6">
+        <div class="bg-black border border-gold/30 w-full max-w-2xl p-10 space-y-6">
+            <h3 class="serif text-gold text-3xl">Journal Entry</h3>
+            <input type="hidden" id="b-id">
+            <div class="input-group"><label>Title</label><input type="text" id="b-title"></div>
+            <div class="input-group"><label>Excerpt</label><input type="text" id="b-excerpt"></div>
+            <div class="input-group"><label>Content</label><textarea id="b-content" rows="6"></textarea></div>
+            <div class="input-group"><label>Cover Image URL</label><input type="text" id="b-img"></div>
+            <div class="flex space-x-4">
+                <button onclick="saveBlogPost()" class="flex-grow bg-gold text-dark py-4 text-[10px] font-bold uppercase">Publish</button>
+                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Modal -->
+    <div id="menu-modal" class="fixed inset-0 z-[200] modal-overlay hidden flex items-center justify-center p-6">
+        <div class="bg-black border border-gold/30 w-full max-w-2xl p-10 space-y-6">
+            <h3 class="serif text-gold text-3xl">Menu Item</h3>
+            <input type="hidden" id="m-id">
+            <div class="input-group"><label>Tag (e.g. Sea, Land)</label><input type="text" id="m-tag"></div>
+            <div class="input-group"><label>Title</label><input type="text" id="m-title"></div>
+            <div class="input-group"><label>Description</label><input type="text" id="m-desc"></div>
+            <div class="input-group"><label>Image URL</label><input type="text" id="m-img"></div>
+            <div class="flex space-x-4">
+                <button onclick="saveMenuItem()" class="flex-grow bg-gold text-dark py-4 text-[10px] font-bold uppercase">Save Item</button>
+                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div id="gallery-modal" class="fixed inset-0 z-[200] modal-overlay hidden flex items-center justify-center p-6">
+        <div class="bg-black border border-gold/30 w-full max-w-md p-10 space-y-6">
+            <h3 class="serif text-gold text-3xl">Gallery Asset</h3>
+            <div class="input-group"><label>Image URL</label><input type="text" id="g-img"></div>
+            <div class="input-group"><label>Caption (Optional)</label><input type="text" id="g-caption"></div>
+            <div class="flex space-x-4">
+                <button onclick="saveGalleryItem()" class="flex-grow bg-gold text-dark py-4 text-[10px] font-bold uppercase">Add to Gallery</button>
+                <button onclick="closeModals()" class="px-8 border border-white/10 text-gray-500">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        // Initial Data Structure
+        let siteData = {
+            hero: {
+                title: "ORAMA",
+                sub: "Rome | Est. 1994",
+                tagline: "A Dialog Between Earth and Art",
+                img: "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=2000"
+            },
+            about: {
+                tag: "Our Heritage",
+                title: "Three Decades of Culinary Excellence",
+                desc: "ORAMA has redefined the Roman dining landscape by blending centuries-old traditions with avant-garde scientific precision.",
+                img: "https://images.unsplash.com/photo-1550966841-3ee2069b057d?auto=format&fit=crop&q=80&w=1200"
+            },
+            contact: {
+                address: "Via del Corso 12, Rome, Italy",
+                phone: "+39 06 123 4567",
+                email: "concierge@orama.it",
+                hoursWeek: "Mon - Fri: 18:30 - 23:30",
+                hoursWeekend: "Sat - Sun: 12:00 - 00:00"
+            },
+            menu: [
+                { id: 1, tag: "Vegetal", title: "The Botanist", desc: "Wild Roman Herbs, Goat Curd", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800" },
+                { id: 2, tag: "Sea", title: "Tyrrhenian Blue", desc: "Line-caught Seabass, Kelp Foam", img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&q=80&w=800" }
+            ],
+            gallery: [
+                { id: 1, img: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=800", caption: "Cocktail Artistry" },
+                { id: 2, img: "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&q=80&w=800", caption: "Kitchen Detail" },
+                { id: 3, img: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800", caption: "Main Dining Hall" },
+                { id: 4, img: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&q=80&w=800", caption: "The Experience" }
+            ],
+            blog: [
+                { id: 1, title: "The Philosophy of Fire", excerpt: "Exploring the ancient Roman art of open-flame cooking.", content: "Fire is more than a tool...", img: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=1000", date: "Jan 12, 2026" }
+            ],
+            reservations: [
+                { id: 1, date: "2026-02-14", time: "20:00", name: "Marcello Russo", email: "marcello@italy.it", guests: 2, status: "confirmed" }
+            ]
+        };
+
+        // UI View Toggling
+        function toggleView(viewId) {
+            document.querySelectorAll('#site-wrapper, #admin-auth, #admin-console').forEach(el => el.style.display = 'none');
+            const target = document.getElementById(viewId);
+            target.style.display = (viewId === 'admin-console' ? 'flex' : 'block');
+            
+            if(viewId === 'site-wrapper') {
+                document.body.classList.add('public-view');
+                syncPublicUI();
+            } else {
+                document.body.classList.remove('public-view');
+                if(viewId === 'admin-console') {
+                    updateStats();
+                    loadPageContentFields();
+                }
+            }
+        }
+
+        function checkAuth() {
+            if(document.getElementById('admin-pass').value === '1234') toggleView('admin-console');
+            else alert('Access Denied');
+        }
+
+        function logout() { toggleView('site-wrapper'); }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content, .admin-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            if(tabId === 'res-mgr') renderAdminReservations();
+            if(tabId === 'blog-mgr') renderAdminBlog();
+            if(tabId === 'menu-mgr') renderAdminMenu();
+            if(tabId === 'gallery-mgr') renderAdminGallery();
+            if(tabId === 'site-content') loadPageContentFields();
+        }
+
+        // --- CMS LOGIC ---
+
+        function loadPageContentFields() {
+            // Hero
+            document.getElementById('p-hero-title').value = siteData.hero.title;
+            document.getElementById('p-hero-sub').value = siteData.hero.sub;
+            document.getElementById('p-hero-tagline').value = siteData.hero.tagline;
+            document.getElementById('p-hero-img').value = siteData.hero.img;
+            // About
+            document.getElementById('p-about-tag').value = siteData.about.tag;
+            document.getElementById('p-about-title').value = siteData.about.title;
+            document.getElementById('p-about-desc').value = siteData.about.desc;
+            document.getElementById('p-about-img').value = siteData.about.img;
+            // Contact
+            document.getElementById('p-contact-addr').value = siteData.contact.address;
+            document.getElementById('p-contact-phone').value = siteData.contact.phone;
+            document.getElementById('p-contact-email').value = siteData.contact.email;
+            document.getElementById('p-hours-week').value = siteData.contact.hoursWeek;
+            document.getElementById('p-hours-weekend').value = siteData.contact.hoursWeekend;
+        }
+
+        function saveAllPageContent() {
+            // Hero
+            siteData.hero.title = document.getElementById('p-hero-title').value;
+            siteData.hero.sub = document.getElementById('p-hero-sub').value;
+            siteData.hero.tagline = document.getElementById('p-hero-tagline').value;
+            siteData.hero.img = document.getElementById('p-hero-img').value;
+            // About
+            siteData.about.tag = document.getElementById('p-about-tag').value;
+            siteData.about.title = document.getElementById('p-about-title').value;
+            siteData.about.desc = document.getElementById('p-about-desc').value;
+            siteData.about.img = document.getElementById('p-about-img').value;
+            // Contact
+            siteData.contact.address = document.getElementById('p-contact-addr').value;
+            siteData.contact.phone = document.getElementById('p-contact-phone').value;
+            siteData.contact.email = document.getElementById('p-contact-email').value;
+            siteData.contact.hoursWeek = document.getElementById('p-hours-week').value;
+            siteData.contact.hoursWeekend = document.getElementById('p-hours-weekend').value;
+            
+            alert('Website content successfully updated.');
+        }
+
+        // Reservations
+        function handlePublicBooking(e) {
+            e.preventDefault();
+            const booking = {
+                id: Date.now(),
+                date: document.getElementById('res-date').value,
+                time: document.getElementById('res-time').value,
+                name: document.getElementById('res-name').value,
+                email: document.getElementById('res-email').value,
+                guests: document.getElementById('res-guests').value,
+                status: 'pending'
+            };
+            siteData.reservations.push(booking);
+            document.getElementById('booking-msg').classList.remove('hidden');
+            e.target.reset();
+        }
+
+        function renderAdminReservations() {
+            document.getElementById('admin-res-list').innerHTML = siteData.reservations.map(r => `
+                <tr>
+                    <td class="p-4">${r.date} @ ${r.time}</td>
+                    <td class="p-4 font-semibold text-white">${r.name}<br><span class="opacity-40 text-[8px] font-normal uppercase">${r.email}</span></td>
+                    <td class="p-4 text-gold">${r.guests} Guests</td>
+                    <td class="p-4"><span class="status-pill status-${r.status}">${r.status}</span></td>
+                    <td class="p-4 space-x-2">
+                        ${r.status === 'pending' ? `<button onclick="updateResStatus(${r.id}, 'confirmed')" class="text-green-500 hover:underline">Confirm</button>` : ''}
+                        <button onclick="deleteRes(${r.id})" class="text-red-500 hover:underline">Cancel</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateResStatus(id, status) {
+            const idx = siteData.reservations.findIndex(r => r.id === id);
+            siteData.reservations[idx].status = status;
+            renderAdminReservations();
+            updateStats();
+        }
+
+        function deleteRes(id) {
+            siteData.reservations = siteData.reservations.filter(r => r.id !== id);
+            renderAdminReservations();
+            updateStats();
+        }
+
+        // Blog
+        function renderAdminBlog() {
+            document.getElementById('admin-blog-list').innerHTML = siteData.blog.map(b => `
+                <div class="bg-white/5 p-4 border border-white/10 flex items-center space-x-4 group">
+                    <img src="${b.img}" class="w-20 h-20 object-cover">
+                    <div class="flex-grow">
+                        <h5 class="text-white text-sm font-semibold">${b.title}</h5>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">${b.date}</p>
+                    </div>
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity space-x-4">
+                        <button onclick="openBlogModal(${b.id})" class="text-gold text-[10px] uppercase">Edit</button>
+                        <button onclick="deleteBlog(${b.id})" class="text-red-500 text-[10px] uppercase">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openBlogModal(id = null) {
+            document.getElementById('blog-modal').classList.remove('hidden');
+            if(id) {
+                const b = siteData.blog.find(x => x.id === id);
+                ['id','title','excerpt','content','img'].forEach(k => document.getElementById(`b-${k}`).value = b[k]);
+            } else {
+                ['id','title','excerpt','content','img'].forEach(k => document.getElementById(`b-${k}`).value = "");
+            }
+        }
+
+        function saveBlogPost() {
+            const id = document.getElementById('b-id').value;
+            const post = {
+                id: id ? parseInt(id) : Date.now(),
+                title: document.getElementById('b-title').value,
+                excerpt: document.getElementById('b-excerpt').value,
+                content: document.getElementById('b-content').value,
+                img: document.getElementById('b-img').value,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            };
+            if(id) siteData.blog[siteData.blog.findIndex(x=>x.id===parseInt(id))] = post;
+            else siteData.blog.push(post);
+            renderAdminBlog(); closeModals(); updateStats();
+        }
+
+        function deleteBlog(id) { siteData.blog = siteData.blog.filter(b=>b.id!==id); renderAdminBlog(); updateStats(); }
+
+        // Menu
+        function renderAdminMenu() {
+            document.getElementById('admin-menu-list').innerHTML = siteData.menu.map(m => `
+                <div class="bg-white/5 p-4 border border-white/10 flex items-center space-x-4 group">
+                    <img src="${m.img}" class="w-20 h-20 object-cover">
+                    <div class="flex-grow">
+                        <h5 class="text-white text-sm font-semibold">${m.title}</h5>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">${m.tag}</p>
+                    </div>
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity space-x-4">
+                        <button onclick="openMenuModal(${m.id})" class="text-gold text-[10px] uppercase">Edit</button>
+                        <button onclick="deleteMenu(${m.id})" class="text-red-500 text-[10px] uppercase">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openMenuModal(id = null) {
+            document.getElementById('menu-modal').classList.remove('hidden');
+            if(id) {
+                const m = siteData.menu.find(x => x.id === id);
+                ['id','tag','title','desc','img'].forEach(k => document.getElementById(`m-${k}`).value = m[k]);
+            } else {
+                ['id','tag','title','desc','img'].forEach(k => document.getElementById(`m-${k}`).value = "");
+            }
+        }
+
+        function saveMenuItem() {
+            const id = document.getElementById('m-id').value;
+            const item = {
+                id: id ? parseInt(id) : Date.now(),
+                tag: document.getElementById('m-tag').value,
+                title: document.getElementById('m-title').value,
+                desc: document.getElementById('m-desc').value,
+                img: document.getElementById('m-img').value
+            };
+            if(id) siteData.menu[siteData.menu.findIndex(x=>x.id===parseInt(id))] = item;
+            else siteData.menu.push(item);
+            renderAdminMenu(); closeModals();
+        }
+
+        function deleteMenu(id) { siteData.menu = siteData.menu.filter(m => m.id !== id); renderAdminMenu(); }
+
+        // Gallery
+        function renderAdminGallery() {
+            document.getElementById('admin-gallery-list').innerHTML = siteData.gallery.map(g => `
+                <div class="relative aspect-square group">
+                    <img src="${g.img}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button onclick="deleteGallery(${g.id})" class="text-red-500 text-[9px] uppercase font-bold tracking-tighter">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openGalleryModal() { document.getElementById('gallery-modal').classList.remove('hidden'); }
+
+        function saveGalleryItem() {
+            const item = {
+                id: Date.now(),
+                img: document.getElementById('g-img').value,
+                caption: document.getElementById('g-caption').value || ""
+            };
+            siteData.gallery.push(item);
+            renderAdminGallery(); closeModals(); updateStats();
+        }
+
+        function deleteGallery(id) {
+            siteData.gallery = siteData.gallery.filter(g => g.id !== id);
+            renderAdminGallery();
+            updateStats();
+        }
+
+        // Public View Sync
+        function syncPublicUI() {
+            // Text Elements
+            document.getElementById('hero-title-text').innerText = siteData.hero.title;
+            document.getElementById('hero-sub-text').innerText = siteData.hero.sub;
+            document.getElementById('hero-tagline-text').innerText = siteData.hero.tagline;
+            document.getElementById('hero-img-bg').src = siteData.hero.img;
+            
+            document.getElementById('about-tag').innerText = siteData.about.tag;
+            document.getElementById('about-title-text').innerText = siteData.about.title;
+            document.getElementById('about-desc-text').innerText = siteData.about.desc;
+            document.getElementById('about-img').src = siteData.about.img;
+
+            // Footer Elements
+            document.getElementById('footer-address').innerText = siteData.contact.address;
+            document.getElementById('footer-phone').innerText = siteData.contact.phone;
+            document.getElementById('footer-email').innerText = siteData.contact.email;
+            document.getElementById('footer-hours-week').innerText = siteData.contact.hoursWeek;
+            document.getElementById('footer-hours-weekend').innerText = siteData.contact.hoursWeekend;
+
+            // Menu Grid
+            document.getElementById('public-menu-grid').innerHTML = siteData.menu.map(m => `
+                <div class="menu-card reveal">
+                    <img src="${m.img}">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex flex-col justify-end p-8">
+                        <span class="text-[8px] text-gold uppercase mb-2">${m.tag}</span>
+                        <h4 class="text-2xl serif text-white">${m.title}</h4>
+                        <p class="text-[10px] text-gray-400 uppercase">${m.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            // Gallery Grid
+            document.getElementById('public-gallery-grid').innerHTML = siteData.gallery.map(g => `
+                <div class="gallery-card reveal">
+                    <img src="${g.img}">
+                    <div class="absolute inset-0 opacity-0 hover:opacity-100 bg-black/40 flex items-center justify-center transition-all">
+                        <span class="text-[9px] uppercase tracking-widest text-white border border-white/20 p-2">${g.caption || 'ORAMA MOMENT'}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Blog Grid
+            document.getElementById('public-blog-grid').innerHTML = siteData.blog.map(b => `
+                <div class="blog-card reveal group">
+                    <img src="${b.img}">
+                    <div class="p-8 bg-black/40 backdrop-blur-sm group-hover:bg-black/60 transition-all">
+                        <span class="text-[8px] text-gold uppercase">${b.date}</span>
+                        <h4 class="text-2xl serif text-white mt-2 mb-4">${b.title}</h4>
+                        <p class="text-xs text-gray-400 mb-6">${b.excerpt}</p>
+                        <button class="text-[8px] uppercase tracking-widest text-gold border-b border-gold/40 pb-1">Read Story</button>
+                    </div>
+                </div>
+            `).join('');
+
+            initAnimations();
+        }
+
+        function updateStats() {
+            document.getElementById('stat-pending').innerText = siteData.reservations.filter(r => r.status === 'pending').length;
+            document.getElementById('stat-blog').innerText = siteData.blog.length;
+            document.getElementById('stat-gallery').innerText = siteData.gallery.length;
+        }
+
+        function initAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.utils.toArray('.reveal').forEach(el => {
+                gsap.from(el, { opacity: 0, y: 50, duration: 1, scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' } });
+            });
+        }
+
+        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden')); }
+
+        window.onload = () => {
+            syncPublicUI();
+            const cursor = document.getElementById('cursor'), follower = document.getElementById('cursor-follower');
+            document.addEventListener('mousemove', e => {
+                gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0 });
+                gsap.to(follower, { x: e.clientX - 20, y: e.clientY - 20, duration: 0.15 });
+            });
+        };
+    </script>
+</body>
+</html>
